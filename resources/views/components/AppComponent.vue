@@ -8,12 +8,12 @@
                 </div>
                 <img src="/logo.png" alt="" class="img-logo">
                 <div class="btn-group">
-                    <div>
+                    <div v-if="!$store.state.user.authFlg">
                         <button class="btn btn-header btn-bg-black">로그인</button>
                         <button class="btn btn-header btn-bg-black">회원가입</button>
                     </div>
-                    <div>
-                        <button class="btn btn-header btn-bg-black">로그아웃</button>
+                    <div v-if="$store.state.user.authFlg">
+                        <button @click="$store.dispatch('user/logout')" class="btn btn-header btn-bg-black">로그아웃</button>
                     </div>
                 </div>
             </div>
@@ -21,6 +21,7 @@
     </header>
     <!-- Main -->
     <main>
+        <UserInfoComponent v-if="$store.state.user.authFlg" />
         <div class="container"> 
             <router-view>
             </router-view>
@@ -33,7 +34,7 @@
 </template>
 
 <script setup>
-
+    import UserInfoComponent from './user/UserInfoComponent';
 </script>
 
 <style>

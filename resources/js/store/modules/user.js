@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../../axios';
 import router from '../../router';
 
 export default {
@@ -17,6 +17,10 @@ export default {
         
         setUserInfo(state, userInfo) {
             state.userInfo = userInfo;
+        },
+        setUserInfoBoardsCount(state) {
+            state.userInfo.boards_count++;
+            localStorage.setItem('userInfo', JSON.stringify(state.userInfo));
         }
 	}
 	,actions: {
@@ -60,6 +64,33 @@ export default {
                     
                     
                 }
+            });
+        },
+
+        logout(context) {
+            const url = '/api/logout';
+            const config = {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
+                }
+            }
+
+            axios.post(url, null, config)
+            .then(response => {
+                alert('로그아웃 완료');
+            })
+            .catch(error => {
+                alert('문제가 발생하여 로그아웃');
+            })
+            .finally(() => {
+                // 로컬 스토리지 초기화
+                localStorage.clear();
+
+                // Auth 플레그 초기화
+                context.commit('setAuthFlg', false);
+                context.commit('setUserInfo', {});
+
+                router.replace('/login');
             });
         }
 	}

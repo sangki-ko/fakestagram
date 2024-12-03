@@ -22,6 +22,10 @@ class MyEncrypt {
         return rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
      }
 
+    public function base64UrlDecode(string $base64) {
+        return base64_decode(strtr($base64, '-', '+/'));
+    }
+
 
 
     

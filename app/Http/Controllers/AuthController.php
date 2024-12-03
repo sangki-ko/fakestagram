@@ -7,6 +7,7 @@ use App\Models\User;
 use NewToken;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -14,6 +15,7 @@ class AuthController extends Controller
     public function login(UserRequest $request) {
         // 유저 정보 획득
         $userInfo = User::where('account', $request->account)
+                        ->withCount('boards')
                         ->first();
 
         // 비밀번호 체크
@@ -37,5 +39,24 @@ class AuthController extends Controller
 
         return response()->json($responseData, 200);
 
+        }
+
+        public function logout(Request $request) {
+            $id = NewToken::getValueInPayload($request->bearerToken(), 'idt');
+
+            DB::beginTransaction();
+
+            $userInfo = User::find($id);
+
+            NewToken::updateRefreshToken($userInfo, null);
+
+            DB::commit();
+
+            $responseData = [
+                'success' => true,
+                'msg' => '로그아웃 성공',
+            ];
+            
+            return response()->json($responseData, 200);
         }
 }

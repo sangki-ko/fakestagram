@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Models\User;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\DB;
 use MyEncrypt;
 use PDOException;
@@ -41,6 +42,21 @@ class NewToken {
         }
 
         return true;
+    }
+
+    public function getValueInPayload(string $token, string $key) {
+        // 토큰 분리
+        // 토큰은 헤더, 페이로드, 시그니처 세개로 이루어져 있다.
+        // 우리가 토큰을 받아 페이로드에 담겨져 있는 유저 데이터를 가져올 수 있다.
+        // 이 방법으로 데이터 베이스에 있는 리프레쉬 토큰 제거, 해당 유저의 로그아웃을 도운다.
+        list($header, $payload, $signature) = $this->explodeToken($token);
+        $decodedPayload = json_decode(MyEncrypt::base64UrlDecode($payload));
+
+        if(empty($decodedPayload) || !isset($decodedPayload->$key)) {
+            throw new AuthenticationException('E24');
+        }
+
+        return $decodedPayload->$key;
     }
 
     /** 
@@ -142,6 +158,22 @@ class NewToken {
        } 
 
 
+       /**
+        * 토큰 분리
+        *
+        * 토큰 페이로드에 있는 부분을 잘라서 데이터를 받을 때 헤야 하는 행위
+        *
+        */
+
+        private function explodeToken($token) {
+            $arrToken = explode('.', $token);
+
+            if(count($arrToken) !== 3) {
+                throw new AuthenticationException('E23');
+            } 
+
+            return $arrToken;
+        }
 
 
 }
